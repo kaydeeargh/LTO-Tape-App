@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import configparser as cp
 
+
 class Main_Window(tk.Frame):
 
     def __init__(self):
@@ -17,9 +18,6 @@ class Main_Window(tk.Frame):
 
     def widgets(self):
 
-        def doNothing():
-            pass
-
         addMenu = tk.Menu(menu, tearoff=0)
         remMenu = tk.Menu(menu, tearoff=0)
         menu.add_cascade(label="Add", menu=addMenu)
@@ -28,9 +26,11 @@ class Main_Window(tk.Frame):
         addMenu.add_command(label="T Tapes", command=lambda: self.add_tape('T Tape'))
         addMenu.add_command(label="AU Tapes", command=lambda: self.add_tape('AU Tape'))
 
-        remMenu.add_command(label="W Tapes", command=self.rem_wtape)
-        remMenu.add_command(label="T Tapes", command=self.rem_ttape)
-        remMenu.add_command(label="AU Tapes", command=self.rem_autape)
+        remMenu.add_command(label="W Tapes", command=lambda: self.rem_tape('W Tape'))
+        remMenu.add_command(label="T Tapes", command=lambda: self.rem_tape('T Tape'))
+        remMenu.add_command(label="AU Tapes", command=lambda: self.rem_tape('AU Tape'))
+
+
 
     def add_tape(self, code):
 
@@ -94,58 +94,28 @@ class Main_Window(tk.Frame):
             with open('param.ini', 'w') as configfile:
                 config.write(configfile)
 
-    def add_wtape(self):
+    def rem_tape(self, code):
 
-        config = cp.ConfigParser()
-        config.read('param.ini')
-        self.currentwplace = config.getint('Windows Case', 'wcasecount')
+        if code == 'W Tape':
+            self.wclen = len(self.wc)
+            self.windex = self.wclen - 1
+            self.wc[self.windex][0].destroy()
+            self.wc[self.windex][1].destroy()
+            del self.wc[self.windex]
 
+        if code == 'T Tape':
+            self.tclen = len(self.tc)
+            self.tindex = self.tclen - 1
+            self.tc[self.tindex][0].destroy()
+            self.tc[self.tindex][1].destroy()
+            del self.tc[self.tindex]
 
-
-        if self.currentwplace > 0:
-
-            # entry box for W tape case ID
-            self.wcase = ttk.Entry(self.wframe)
-            self.wcase.insert(0, "Scan Case")
-            self.wcase.grid(row=0, column=self.currentwplace, padx=10)
-            self.wcase.bind('<Button-1>', self.clear_entry)
-
-            # # text boxes for windows tape scans
-            self.wtext = tk.Text(self.wframe, width=10)
-            self.wtext.grid(row=1, column=self.currentwplace, sticky="wens", padx=10, pady=10)
-
-        self.wctuple = (self.wcase, self.wtext)
-        self.wc.append(self.wctuple)
-
-        self.currentwplace += 1
-        config.set('Windows Case', 'wcasecount', '%s' % (self.currentwplace))
-        with open('param.ini', 'w') as configfile:
-            config.write(configfile)
-
-    def rem_wtape(self):
-
-        self.wclen = len(self.wc)
-        self.windex = self.wclen - 1
-        self.wc[self.windex][0].destroy()
-        self.wc[self.windex][1].destroy()
-        del self.wc[self.windex]
-
-    def rem_ttape(self):
-
-        self.tclen = len(self.tc)
-        self.tindex = self.tclen - 1
-        self.tc[self.tindex][0].destroy()
-        self.tc[self.tindex][1].destroy()
-        del self.tc[self.tindex]
-
-    def rem_autape(self):
-
-        self.auclen = len(self.auc)
-        self.auindex = self.auclen - 1
-        self.auc[self.auindex][0].destroy()
-        self.auc[self.auindex][1].destroy()
-        del self.auc[self.auindex]
-
+        if code == 'AU Tape':
+            self.auclen = len(self.auc)
+            self.auindex = self.auclen - 1
+            self.auc[self.auindex][0].destroy()
+            self.auc[self.auindex][1].destroy()
+            del self.auc[self.auindex]
 
     def w_widgets(self):
 
@@ -163,6 +133,12 @@ class Main_Window(tk.Frame):
         # text boxes for windows tape scans
         self.wtext = tk.Text(self.wframe, width=10)
         self.wtext.grid(row=1, column=0, sticky="wens", padx=10, pady=10)
+
+        """ This button will be to copy everything in the Text box to be pasted externally"""
+        self.wbutt = tk.Button(self.wframe, height=25, width=25)
+        self.wbutt.grid(row=3)
+        self.copyicon = tk.PhotoImage(file='copy.png')
+        self.wbutt.config(image=self.copyicon)
 
     def t_widgets(self):
 
