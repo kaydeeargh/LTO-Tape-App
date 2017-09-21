@@ -47,7 +47,7 @@ class Main_Window(tk.Frame):
             self.wcase.bind('<Button-1>', self.clear_entry)
 
             # # text boxes for windows tape scans
-            self.wtext = tk.Text(self.wframe, width=10)
+            self.wtext = tk.Text(self.wframe, height=8, width=10)
             self.wtext.grid(row=1, column=self.curr_wplace, sticky="wens", padx=10, pady=10)
 
             self.wctuple = (self.wcase, self.wtext)
@@ -65,7 +65,7 @@ class Main_Window(tk.Frame):
             self.tcase.bind('<Button-1>', self.clear_entry)
 
             # # text boxes for windows tape scans
-            self.ttext = tk.Text(self.tframe, width=10)
+            self.ttext = tk.Text(self.tframe, height=8, width=10)
             self.ttext.grid(row=1, column=self.curr_tplace, sticky="wens", padx=10, pady=10)
 
             self.tctuple = (self.tcase, self.ttext)
@@ -83,7 +83,7 @@ class Main_Window(tk.Frame):
             self.aucase.bind('<Button-1>', self.clear_entry)
 
             # # text boxes for windows tape scans
-            self.autext = tk.Text(self.auframe, width=10)
+            self.autext = tk.Text(self.auframe, height=8, width=10)
             self.autext.grid(row=1, column=self.curr_auplace, sticky="wens", padx=10, pady=10)
 
             self.auctuple = (self.aucase, self.autext)
@@ -120,58 +120,69 @@ class Main_Window(tk.Frame):
     def w_widgets(self):
 
         # frame for windows tape scans. It's own frame is required for organization and multiples.
-        self.wframe = ttk.LabelFrame(labelanchor='n', text="Windows Tapes", height=600, width=150)
+        self.wframe = ttk.LabelFrame(labelanchor='n', text="Windows Tapes", height=600, width=200)
         self.wframe.columnconfigure(0, weight=1)
-        self.wframe.pack(side="left", fill="y")
+        self.wframe.grid(row=10, column=0, sticky="w")
 
         # entry box for W tape case ID
         self.wcase = ttk.Entry(self.wframe)
         self.wcase.insert(0, "Scan Case")
-        self.wcase.grid(row=0, column=0, padx=10)
+        self.wcase.grid(row=0, column=0, sticky="w", padx=10)
         self.wcase.bind('<Button-1>', self.clear_entry)
 
         # text boxes for windows tape scans
-        self.wtext = tk.Text(self.wframe, width=10)
-        self.wtext.grid(row=1, column=0, sticky="wens", padx=10, pady=10)
+        self.wtext = tk.Text(self.wframe, height=8, width=10)
+        self.wtext.grid(row=1, columnspan=2, sticky="wens", padx=10, pady=10)
 
         """ This button will be to copy everything in the Text box to be pasted externally"""
         self.wbutt = tk.Button(self.wframe, height=25, width=25)
-        self.wbutt.grid(row=3)
-        self.copyicon = tk.PhotoImage(file='copy.png')
-        self.wbutt.config(image=self.copyicon)
+        self.wbutt.grid(row=0, column=1, sticky="w", padx=10)
+        self.wcopyicon = tk.PhotoImage(file='copy.png')
+        self.wbutt.config(image=self.wcopyicon)
 
     def t_widgets(self):
 
         # frame for T tapes. It's own frame is required for organization and multiples.
         self.tframe = ttk.LabelFrame(labelanchor='n', text="T Tapes", height=600, width=200)
         self.tframe.columnconfigure(0, weight=1)
-        self.tframe.pack(side="left", fill="y")
+        self.tframe.grid(row=20, column=0, sticky="w")
 
         # entry box for T tape case ID
         self.tcase = ttk.Entry(self.tframe)
         self.tcase.insert(0, "Scan Case")
-        self.tcase.grid(row=0, column=0, padx=10)
+        self.tcase.grid(row=0, column=0, sticky="w", padx=10)
         self.tcase.bind('<Button-1>', self.clear_entry)
 
         # text box for t tape scans
-        self.ttext = tk.Text(self.tframe, width=10)
-        self.ttext.grid(row=1, column=0, sticky="wens", padx=10, pady=10)
+        self.ttext = tk.Text(self.tframe, height=8, width=10)
+        self.ttext.grid(row=1, columnspan=2, sticky="wens", padx=10, pady=10)
+
+        self.tbutt = tk.Button(self.tframe, height=25, width=25)
+        self.tbutt.grid(row=0, column=1, sticky="w", padx=10)
+        self.tcopyicon = tk.PhotoImage(file='copy.png')
+        self.tbutt.config(image=self.tcopyicon)
 
     def au_widgets(self):
         # frame for T tapes. It's own frame is required for organization and multiples.
         self.auframe = ttk.LabelFrame(labelanchor='n', text="AU Tapes", height=600, width=200)
         self.auframe.columnconfigure(0, weight=1)
-        self.auframe.pack(side="left", fill="y")
+        self.auframe.grid(row=30, column=0, sticky="w")
 
         # entry box for T tape case ID
         self.aucase = ttk.Entry(self.auframe)
         self.aucase.insert(0, "Scan Case")
-        self.aucase.grid(row=0, column=0, padx=10)
+        self.aucase.grid(row=0, column=0, sticky="w", padx=10)
         self.aucase.bind('<Button-1>', self.clear_entry)
 
         # text box for t tape scans
-        self.autext = tk.Text(self.auframe, width=10)
-        self.autext.grid(row=1, column=0, sticky="wens", padx=10, pady=10)
+        self.autext = tk.Text(self.auframe, height=8, width=10)
+        self.autext.grid(row=1, columnspan=2, sticky="wens", padx=10, pady=10)
+
+        self.aubutt = tk.Button(self.auframe, height=25, width=25)
+        self.aubutt.grid(row=0, column=1, sticky="w", padx=10)
+        self.aucopyicon = tk.PhotoImage(file='copy.png')
+        self.aubutt.config(image=self.aucopyicon)
+
 
     # method to delete default text when mouse button is pressed
     def clear_entry(self, event=None):
