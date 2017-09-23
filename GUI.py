@@ -14,7 +14,11 @@ class Main_Window(tk.Frame):
         self.wc = []
         self.tc = []
         self.auc = []
+        self.image_use = [tk.PhotoImage(file='copy.png')]
         root.protocol("WM_DELETE_WINDOW", self.on_close)
+        print (self.image_use)
+
+
 
     def widgets(self):
 
@@ -31,7 +35,6 @@ class Main_Window(tk.Frame):
         remMenu.add_command(label="AU Tapes", command=lambda: self.rem_tape('AU Tape'))
 
 
-
     def add_tape(self, code):
 
         config = cp.ConfigParser()
@@ -43,35 +46,51 @@ class Main_Window(tk.Frame):
         if code == 'W Tape':
             self.wcase = ttk.Entry(self.wframe)
             self.wcase.insert(0, "Scan Case")
-            self.wcase.grid(row=0, column=self.curr_wplace, padx=10)
+            self.wcase.grid(row=0, column=self.curr_wplace, sticky='w', padx=10)
             self.wcase.bind('<Button-1>', self.clear_entry)
 
             # # text boxes for windows tape scans
             self.wtext = tk.Text(self.wframe, height=8, width=10)
-            self.wtext.grid(row=1, column=self.curr_wplace, sticky="wens", padx=10, pady=10)
-
-            self.wctuple = (self.wcase, self.wtext)
-            self.wc.append(self.wctuple)
+            self.wtext.grid(row=1, column=self.curr_wplace, columnspan=2, sticky="wens", padx=10, pady=10)
 
             self.curr_wplace += 1
-            config.set('DEFAULT', 'wcasecount', '%s' % (self.curr_wplace))
+            self.wbutt = tk.Button(self.wframe, height=25, width=25)
+            self.wbutt.grid(row=0, column=self.curr_wplace, sticky="w", padx=10)
+            self.photo_butt = self.image_use[0]
+            self.wbutt.config(image=self.photo_butt)
+            self.curr_wplace -= 1
+
+            self.wctuple = (self.wcase, self.wtext, self.wbutt)
+            self.wc.append(self.wctuple)
+
+            self.curr_wplace += 2
+            config.set('DEFAULT', 'wcasecount', '%s' % self.curr_wplace)
             with open('param.ini', 'w') as configfile:
                 config.write(configfile)
+
+
 
         if code == 'T Tape':
             self.tcase = ttk.Entry(self.tframe)
             self.tcase.insert(0, "Scan Case")
-            self.tcase.grid(row=0, column=self.curr_tplace, padx=10)
+            self.tcase.grid(row=0, column=self.curr_tplace, sticky='w', padx=10)
             self.tcase.bind('<Button-1>', self.clear_entry)
 
             # # text boxes for windows tape scans
             self.ttext = tk.Text(self.tframe, height=8, width=10)
-            self.ttext.grid(row=1, column=self.curr_tplace, sticky="wens", padx=10, pady=10)
-
-            self.tctuple = (self.tcase, self.ttext)
-            self.tc.append(self.tctuple)
+            self.ttext.grid(row=1, column=self.curr_tplace, columnspan=2, sticky="wens", padx=10, pady=10)
 
             self.curr_tplace += 1
+            self.tbutt = tk.Button(self.tframe, height=25, width=25)
+            self.tbutt.grid(row=0, column=self.curr_tplace, sticky="w", padx=10)
+            self.photo_butt = self.image_use[0]
+            self.tbutt.config(image=self.photo_butt)
+            self.curr_tplace -= 1
+
+            self.tctuple = (self.tcase, self.ttext, self.tbutt)
+            self.tc.append(self.tctuple)
+
+            self.curr_tplace += 2
             config.set('DEFAULT', 'tcasecount', '%s' % (self.curr_tplace))
             with open('param.ini', 'w') as configfile:
                 config.write(configfile)
@@ -84,12 +103,19 @@ class Main_Window(tk.Frame):
 
             # # text boxes for windows tape scans
             self.autext = tk.Text(self.auframe, height=8, width=10)
-            self.autext.grid(row=1, column=self.curr_auplace, sticky="wens", padx=10, pady=10)
-
-            self.auctuple = (self.aucase, self.autext)
-            self.auc.append(self.auctuple)
+            self.autext.grid(row=1, column=self.curr_auplace, columnspan=2, sticky="wens", padx=10, pady=10)
 
             self.curr_auplace += 1
+            self.aubutt = tk.Button(self.auframe, height=25, width=25)
+            self.aubutt.grid(row=0, column=self.curr_auplace, sticky="w", padx=10)
+            self.photo_butt = self.image_use[0]
+            self.aubutt.config(image=self.photo_butt)
+            self.curr_auplace -= 1
+
+            self.auctuple = (self.aucase, self.autext, self.aubutt)
+            self.auc.append(self.auctuple)
+
+            self.curr_auplace += 2
             config.set('DEFAULT', 'aucasecount', '%s' % (self.curr_auplace))
             with open('param.ini', 'w') as configfile:
                 config.write(configfile)
@@ -101,6 +127,7 @@ class Main_Window(tk.Frame):
             self.windex = self.wclen - 1
             self.wc[self.windex][0].destroy()
             self.wc[self.windex][1].destroy()
+            self.wc[self.windex][2].destroy()
             del self.wc[self.windex]
 
         if code == 'T Tape':
@@ -108,6 +135,7 @@ class Main_Window(tk.Frame):
             self.tindex = self.tclen - 1
             self.tc[self.tindex][0].destroy()
             self.tc[self.tindex][1].destroy()
+            self.tc[self.tindex][2].destroy()
             del self.tc[self.tindex]
 
         if code == 'AU Tape':
@@ -115,6 +143,7 @@ class Main_Window(tk.Frame):
             self.auindex = self.auclen - 1
             self.auc[self.auindex][0].destroy()
             self.auc[self.auindex][1].destroy()
+            self.auc[self.auindex][2].destroy()
             del self.auc[self.auindex]
 
     def w_widgets(self):
@@ -193,9 +222,10 @@ class Main_Window(tk.Frame):
         config.read('param.ini')
 
         # resets necessary config on window close
-        config.set('DEFAULT', 'wcasecount', '1')
-        config.set('DEFAULT', 'tcasecount', '1')
-        config.set('DEFAULT', 'aucasecount', '1')
+        config.set('DEFAULT', 'wcasecount', '2')
+        config.set('DEFAULT', 'tcasecount', '2')
+        config.set('DEFAULT', 'aucasecount', '2')
+        config.set('DEFAULT', 'imagecount', '0')
 
 
         with open('param.ini', 'w') as configfile:
@@ -205,10 +235,12 @@ class Main_Window(tk.Frame):
 
 
 root = tk.Tk()
-root.geometry('600x600+200+200')
+
 
 root.style = ttk.Style()
 root.style.theme_use("default")
+root.update()
+root.minsize(root.winfo_width(),root.winfo_height())
 
 menu = tk.Menu(root)
 root.config(menu=menu)
