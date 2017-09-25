@@ -1,22 +1,27 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import configparser as cp
+import os
 
 
 class Main_Window(tk.Frame):
 
     def __init__(self):
         super().__init__()
+        self.image_use = [tk.PhotoImage(file='copy.png')]
+        self.wc = []
+        self.tc = []
+        self.auc = []
+
         self.w_widgets()
         self.widgets()
         self.t_widgets()
         self.au_widgets()
-        self.wc = []
-        self.tc = []
-        self.auc = []
-        self.image_use = [tk.PhotoImage(file='copy.png')]
+
+
         root.protocol("WM_DELETE_WINDOW", self.on_close)
-        print (self.image_use)
+        root.resizable(False, False)
+
 
 
 
@@ -33,6 +38,8 @@ class Main_Window(tk.Frame):
         remMenu.add_command(label="W Tapes", command=lambda: self.rem_tape('W Tape'))
         remMenu.add_command(label="T Tapes", command=lambda: self.rem_tape('T Tape'))
         remMenu.add_command(label="AU Tapes", command=lambda: self.rem_tape('AU Tape'))
+
+        self.submit = tk.Button(text='SUBMIT', command=self.create_doc).grid(row=100, column=0, sticky='wens')
 
 
     def add_tape(self, code):
@@ -212,6 +219,10 @@ class Main_Window(tk.Frame):
         self.aucopyicon = tk.PhotoImage(file='copy.png')
         self.aubutt.config(image=self.aucopyicon)
 
+    def create_doc(self):
+        os.chdir(r'C:\Users\Public\Desktop')
+        self.outgoing = open('Outgoing.txt', 'w')
+        test = self.wtext.get(1.0, 'end')
 
     # method to delete default text when mouse button is pressed
     def clear_entry(self, event=None):
