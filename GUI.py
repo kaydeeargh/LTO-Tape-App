@@ -137,7 +137,7 @@ class Main_Window(tk.Frame):
             self.wc[self.windex][2].destroy()
             del self.wc[self.windex]
 
-        if code == 'T Tape':
+        elif code == 'T Tape':
             self.tclen = len(self.tc)
             self.tindex = self.tclen - 1
             self.tc[self.tindex][0].destroy()
@@ -145,7 +145,7 @@ class Main_Window(tk.Frame):
             self.tc[self.tindex][2].destroy()
             del self.tc[self.tindex]
 
-        if code == 'AU Tape':
+        elif code == 'AU Tape':
             self.auclen = len(self.auc)
             self.auindex = self.auclen - 1
             self.auc[self.auindex][0].destroy()
@@ -220,8 +220,7 @@ class Main_Window(tk.Frame):
         self.aubutt.config(image=self.aucopyicon)
 
     def create_doc(self):
-        os.chdir(r'C:\Users\Public\Desktop')
-        self.outgoing = open('Outgoing.txt', 'w')
+        self.outgoing = open(r'C:\Users\Public\Desktop\Outgoing.txt', 'w')
         test = self.wtext.get(1.0, 'end')
 
     # method to delete default text when mouse button is pressed
