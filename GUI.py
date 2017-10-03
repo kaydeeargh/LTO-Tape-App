@@ -70,6 +70,7 @@ class Main_Window(tk.Frame):
             self.wbutt.grid(row=0, column=self.curr_wplace, sticky="w", padx=10)
             self.photo_butt = self.image_use[0]
             self.wbutt.config(image=self.photo_butt)
+            self.wbutt.bind('<Button-1>', self.copy_buttons)
             self.curr_wplace -= 1
 
             self.wctuple = (self.wcase, self.wtext, self.wbutt.winfo_id())
@@ -97,6 +98,7 @@ class Main_Window(tk.Frame):
             self.tbutt.grid(row=0, column=self.curr_tplace, sticky="w", padx=10)
             self.photo_butt = self.image_use[0]
             self.tbutt.config(image=self.photo_butt)
+            self.tbutt.bind('<Button-1>', self.copy_buttons)
             self.curr_tplace -= 1
 
             self.tctuple = (self.tcase, self.ttext, self.tbutt.winfo_id())
@@ -122,6 +124,7 @@ class Main_Window(tk.Frame):
             self.aubutt.grid(row=0, column=self.curr_auplace, sticky="w", padx=10)
             self.photo_butt = self.image_use[0]
             self.aubutt.config(image=self.photo_butt)
+            self.aubutt.bind('<Button-1>', self.copy_buttons)
             self.curr_auplace -= 1
 
             self.auctuple = (self.aucase, self.autext, self.aubutt.winfo_id())
