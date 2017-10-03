@@ -72,7 +72,7 @@ class Main_Window(tk.Frame):
             self.wbutt.config(image=self.photo_butt)
             self.curr_wplace -= 1
 
-            self.wctuple = (self.wcase.winfo_id(), self.wtext.winfo_id(), self.wbutt.winfo_id())
+            self.wctuple = (self.wcase, self.wtext, self.wbutt.winfo_id())
             self.wc.append(self.wctuple)
 
             self.curr_wplace += 2
@@ -99,7 +99,7 @@ class Main_Window(tk.Frame):
             self.tbutt.config(image=self.photo_butt)
             self.curr_tplace -= 1
 
-            self.tctuple = (self.tcase.winfo_id(), self.ttext.winfo_id(), self.tbutt.winfo_id())
+            self.tctuple = (self.tcase, self.ttext, self.tbutt.winfo_id())
             self.tc.append(self.tctuple)
 
             self.curr_tplace += 2
@@ -124,7 +124,7 @@ class Main_Window(tk.Frame):
             self.aubutt.config(image=self.photo_butt)
             self.curr_auplace -= 1
 
-            self.auctuple = (self.aucase.winfo_id(), self.autext.winfo_id(), self.aubutt.winfo_id())
+            self.auctuple = (self.aucase, self.autext, self.aubutt.winfo_id())
             self.auc.append(self.auctuple)
 
             self.curr_auplace += 2
