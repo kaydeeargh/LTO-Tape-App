@@ -9,6 +9,10 @@ class MainWindow(tk.Frame):
 
     def __init__(self):
         super().__init__()
+
+        self.config = cp.ConfigParser()
+        self.config.read('param.ini')
+
         self.image_use = [tk.PhotoImage(file='copy.png')]
         self.wc = []
         self.tc = []
@@ -31,19 +35,29 @@ class MainWindow(tk.Frame):
         self.aureturn = self.datenow.day + 13
         self.mfreturn = self.datenow.day + 14
 
-        self.wdoc = 'PFS, RCP WINDOWS(WLxxxx)'
-        self.tdoc = 'PFS, RCP UNIX(Txxxxx)'
-        self.rdoc = 'CSI/RPG Unix(Rxxxxx)'
-        self.mfdoc = 'PFS/Molded Fiber AS/400(MFPDxx and MFDDxx)'
-        self.audoc = 'Automotive UNIX(AUxxxx)'
-        self.csdoc = 'CSI AS/400(CSxxxx)'
-        self.hdoc = 'Automotive AS/400(HBxxxx)'
+        self.config.set('DEFAULT', 'datemonth', '%s' % self.datemonth)
+        self.config.set('DEFAULT', 'dateyear', '%s' % self.dateyear)
+        self.config.set('DEFAULT', 'wreturn', '%s' % self.wreturn)
+        self.config.set('DEFAULT', 'treturn', '%s' % self.treturn)
+        self.config.set('DEFAULT', 'aureturn', '%s' % self.aureturn)
+        self.config.set('DEFAULT', 'mfreturn', '%s' % self.mfreturn)
+        self.config.set('DEFAULT', 'username', '%s' % self.username)
+        with open('param.ini', 'w') as configfile:
+            self.config.write(configfile)
 
-        self.w_line = 'SENT DAILY %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.wdoc, self.datemonth, self.wreturn, self.dateyear, self.username)
-        self.t_line = 'SENT DAILY %s, %s AND %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.tdoc, self.rdoc, self.mfdoc, self.datemonth, self.treturn, self.dateyear, self.username)
-        self.mf_line = 'SENT WEEKLY %s TAPES RETURN ON %s/%s/%s & Locked by: %s' % (self.mfdoc, self.datemonth, self.mfreturn, self.dateyear, self.username)
-        self.au_line = 'SENT DAILY %s, %s AND %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.audoc, self.csdoc, self.hdoc, self.datemonth, self.aureturn, self.dateyear, self.username)
-        self.g_line = 'SENT DAILY GRAHAM PACKAGING TAPES Locked by: %s' % self.username
+        # self.wdoc = 'PFS, RCP WINDOWS(WLxxxx)'
+        # self.tdoc = 'PFS, RCP UNIX(Txxxxx)'
+        # self.rdoc = 'CSI/RPG Unix(Rxxxxx)'
+        # self.mfdoc = 'PFS/Molded Fiber AS/400(MFPDxx and MFDDxx)'
+        # self.audoc = 'Automotive UNIX(AUxxxx)'
+        # self.csdoc = 'CSI AS/400(CSxxxx)'
+        # self.hdoc = 'Automotive AS/400(HBxxxx)'
+        #
+        # self.w_line = 'SENT DAILY %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.wdoc, self.datemonth, self.wreturn, self.dateyear, self.username)
+        # self.t_line = 'SENT DAILY %s, %s AND %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.tdoc, self.rdoc, self.mfdoc, self.datemonth, self.treturn, self.dateyear, self.username)
+        # self.mf_line = 'SENT WEEKLY %s TAPES RETURN ON %s/%s/%s & Locked by: %s' % (self.mfdoc, self.datemonth, self.mfreturn, self.dateyear, self.username)
+        # self.au_line = 'SENT DAILY %s, %s AND %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.audoc, self.csdoc, self.hdoc, self.datemonth, self.aureturn, self.dateyear, self.username)
+        # self.g_line = 'SENT DAILY GRAHAM PACKAGING TAPES Locked by: %s' % self.username
 
         root.protocol("WM_DELETE_WINDOW", self.on_close)
         root.resizable(False, False)
@@ -52,8 +66,12 @@ class MainWindow(tk.Frame):
 
         addmenu = tk.Menu(menu, tearoff=0)
         remmenu = tk.Menu(menu, tearoff=0)
+        editmenu = tk.Menu(menu, tearoff=0)
+
+        menu.add_cascade(label="Edit", menu=editmenu)
         menu.add_cascade(label="Add", menu=addmenu)
         menu.add_cascade(label="Remove", menu=remmenu)
+
         addmenu.add_command(label="W Tapes", command=lambda: self.add_tape('W Tape'))
         addmenu.add_command(label="T Tapes", command=lambda: self.add_tape('T Tape'))
         addmenu.add_command(label="AU Tapes", command=lambda: self.add_tape('AU Tape'))
@@ -62,7 +80,12 @@ class MainWindow(tk.Frame):
         remmenu.add_command(label="T Tapes", command=lambda: self.rem_tape('T Tape'))
         remmenu.add_command(label="AU Tapes", command=lambda: self.rem_tape('AU Tape'))
 
-        self.submit = tk.Button(text='SUBMIT', command=self.create_doc).grid(row=100, column=0, columnspan=2, sticky='wens')
+        editmenu.add_command(label="Settings", command=self.preferences)
+
+        submit = tk.Button(text='SUBMIT', command=self.create_doc).grid(row=100, column=0, columnspan=2, sticky='wens')
+
+    def preferences(self):
+        pref_window = tk.Toplevel()
 
     def add_tape(self, code):
 
@@ -78,7 +101,7 @@ class MainWindow(tk.Frame):
             self.wcase.grid(row=0, column=self.curr_wplace, sticky='w', padx=10)
             self.wcase.bind('<Button-1>', self.clear_entry)
 
-            # # text boxes for windows tape scans
+            # text boxes for windows tape scans
             self.wtext = tk.Text(self.wframe, height=8, width=10)
             self.wtext.grid(row=1, column=self.curr_wplace, columnspan=2, sticky="wens", padx=10, pady=10)
 
@@ -90,7 +113,7 @@ class MainWindow(tk.Frame):
             self.wbutt.bind('<Button-1>', self.copy_buttons)
             self.curr_wplace -= 1
 
-            self.wctuple = (self.wcase, self.wtext, self.wbutt.winfo_id())
+            self.wctuple = (self.wcase, self.wtext, self.wbutt, self.wbutt.winfo_id())
             self.wc.append(self.wctuple)
 
             self.curr_wplace += 2
@@ -153,8 +176,7 @@ class MainWindow(tk.Frame):
     def rem_tape(self, code):
 
         if code == 'W Tape':
-            self.wclen = len(self.wc)
-            self.windex = self.wclen - 1
+            self.windex = len(self.wc) - 1
             self.wc[self.windex][0].destroy()
             self.wc[self.windex][1].destroy()
             self.wc[self.windex][2].destroy()
@@ -274,6 +296,7 @@ class MainWindow(tk.Frame):
             self.gbutt.grid(row=0, column=1, sticky="w", padx=10)
             self.gcopyicon = tk.PhotoImage(file='copy.png')
             self.gbutt.config(image=self.gcopyicon)
+            self.gbutt.bind('<Button-1>', self.copy_buttons)
 
             self.gctuple = (self.gcase, self.gtext, self.gbutt.winfo_id())
             self.gc.append(self.gctuple)
@@ -298,6 +321,10 @@ class MainWindow(tk.Frame):
             self.mfbutt.grid(row=0, column=1, sticky="w", padx=10)
             self.mfcopyicon = tk.PhotoImage(file='copy.png')
             self.mfbutt.config(image=self.mfcopyicon)
+            self.mfbutt.bind('<Button-1>', self.copy_buttons)
+
+            self.mftuple = (self.mfcase, self.mftext, self.mfbutt.winfo_id())
+            self.mf.append(self.mftuple)
 
     def dates(self):
         self.datenow = datetime.today()
@@ -309,7 +336,7 @@ class MainWindow(tk.Frame):
     def create_doc(self):
 
         """The below code creates a document, pulls the data from the entry and text widgets and formats it as needed"""
-        self.outgoing = open(r'C:\Users\Public\Desktop\Outgoing_%s%s%s.txt' %(self.dateyear,self.datemonth,self.dateday), 'w')
+        outgoing = open(r'C:\Users\%s\Desktop\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday), 'w')
 
         len_w = len(self.wc)
         len_t = len(self.tc)
@@ -320,32 +347,35 @@ class MainWindow(tk.Frame):
         for x in range(0, len_w):
             in_wcase = self.wc[x][0].get()
             in_wtext = self.wc[x][1].get(1.0, 'end')
-            self.outgoing.write(in_wcase + '\n' + self.w_line + '\n' + in_wtext + '\n')
+            outgoing.write(in_wcase + '\n' + self.config.get('SETTINGS', 'w_line') + '\n' + in_wtext + '\n')
 
         for x in range(0, len_t):
             in_tcase = self.tc[x][0].get()
             in_ttext = self.tc[x][1].get(1.0, 'end')
-            self.outgoing.write(in_tcase + '\n' + self.t_line + '\n' + in_ttext + '\n')
+            if self.dayofweek == 'Monday':
+                outgoing.write(in_tcase + '\n' + self.config.get('SETTINGS', 't_line2') + '\n' + in_ttext + '\n')
+            else:
+                outgoing.write(in_tcase + '\n' + self.config.get('SETTINGS', 't_line1') + '\n' + in_ttext + '\n')
 
         for x in range(0, len_au):
             in_aucase = self.auc[x][0].get()
             in_autext = self.auc[x][1].get(1.0, 'end')
-            self.outgoing.write(in_aucase + '\n' + self.au_line + '\n' + in_autext + '\n')
+            outgoing.write(in_aucase + '\n' + self.config.get('SETTINGS', 'au_line') + '\n' + in_autext + '\n')
 
         if self.dayofweek != 'Sunday' and self.dayofweek != 'Saturday':
             for x in range(0, len_g):
                 in_gcase = self.gc[x][0].get()
                 in_gtext = self.gc[x][1].get(1.0, 'end')
-                self.outgoing.write(in_gcase + '\n' + self.g_line + '\n' + in_gtext + '\n')
+                outgoing.write(in_gcase + '\n' + self.config.get('SETTINGS', 'g_line') + '\n' + in_gtext + '\n')
 
         if self.dayofweek == 'Monday':
             for x in range(0, len_mf):
                 in_mfcase = self.mfc[x][0].get()
                 in_mftext = self.mfc[x][1].get(1.0, 'end')
-                self.outgoing.write(in_mfcase + '\n' + self.mf_line + '\n' + in_mftext + '\n')
+                outgoing.write(in_mfcase + '\n' + self.config.get('SETTINGS', 'mf_line') + '\n' + in_mftext + '\n')
 
-        self.outgoing.close()
-        os.startfile(r'C:\Users\Public\Desktop\Outgoing_%s%s%s.txt' % (self.dateyear, self.datemonth, self.dateday))
+        outgoing.close()
+        os.startfile(r'C:\Users\%s\Desktop\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday))
 
     def copy_buttons(self, event=None):
         indx = event.widget.winfo_id()
@@ -353,27 +383,40 @@ class MainWindow(tk.Frame):
         if widgetset:
             root.clipboard_clear()
             copy_w_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.w_line + '\n' + copy_w_text)
+            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'w_line') + '\n' + copy_w_text)
+
         widgetset = [item for item in self.tc if indx in item]
+
         if widgetset:
-            root.clipboard_clear()
-            copy_t_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.t_line + '\n' + copy_t_text)
+            if self.dayofweek == 'Monday':
+                root.clipboard_clear()
+                copy_t_text = widgetset[0][1].get(1.0, 'end')
+                root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line2') + '\n' + copy_t_text)
+            else:
+                root.clipboard_clear()
+                copy_t_text = widgetset[0][1].get(1.0, 'end')
+                root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line1') + '\n' + copy_t_text)
+
         widgetset = [item for item in self.auc if indx in item]
+
         if widgetset:
             root.clipboard_clear()
             copy_au_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.au_line + '\n' + copy_au_text)
+            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'au_line') + '\n' + copy_au_text)
+
         widgetset = [item for item in self.gc if indx in item]
+
         if widgetset:
             root.clipboard_clear()
             copy_g_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.g_line + '\n' + copy_g_text)
+            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'g_line') + '\n' + copy_g_text)
+
         widgetset = [item for item in self.mfc if indx in item]
+
         if widgetset:
             root.clipboard_clear()
             copy_mf_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.mf_line + '\n' + copy_mf_text)
+            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'mf_line') + '\n' + copy_mf_text)
 
     # method to delete default text when mouse button is pressed
     def clear_entry(self, event=None):
