@@ -2,67 +2,99 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import configparser as cp
 import os
-from datetime import datetime, date
+import datetime
 
+windows_placeholder = None
 
 class MainWindow(tk.Frame):
 
     def __init__(self):
         super().__init__()
 
+        self.column_placeholder = 0
+
         self.config = cp.ConfigParser()
         self.config.read('param.ini')
 
         self.image_use = [tk.PhotoImage(file='copy.png')]
-        self.wc = []
-        self.tc = []
-        self.auc = []
-        self.gc = []
-        self.mfc = []
 
-        self.widgets()
-        self.w_widgets()
-        self.t_widgets()
-        self.au_widgets()
+        self.tape_info = []
+
         self.dates()
-        self.g_widget()
-        self.mf_widget()
+
+        # START OF FRAME CREATION
+        # frame for W tape scans. It's own frame is required for organization and multiples.
+        self.wframe = ttk.LabelFrame(labelanchor='n', text="Windows Tapes", height=600, width=200)
+        self.wframe.columnconfigure(0, weight=1)
+        self.wframe.grid(row=10, column=0, sticky="w")
+
+        # frame for T tapes. It's own frame is required for organization and multiples.
+        self.tframe = ttk.LabelFrame(labelanchor='n', text="T Tapes", height=600, width=200)
+        self.tframe.columnconfigure(0, weight=1)
+        self.tframe.grid(row=20, column=0, sticky="w")
+
+        # frame for AU tapes. It's own frame is required for organization and multiples.
+        self.auframe = ttk.LabelFrame(labelanchor='n', text="AU Tapes", height=600, width=200)
+        self.auframe.columnconfigure(0, weight=1)
+        self.auframe.grid(row=30, column=0, sticky="w")
+
+        # frame for G tapes. Gridded based on day of week.
+        self.gframe = ttk.LabelFrame(labelanchor='n', text="G Tapes", height=600, width=200)
+
+        # frame for MF tapes. Gridded based on day of week.
+        self.mfframe = ttk.LabelFrame(labelanchor='n', text="MF Tapes", height=600, width=200)
+        # END OF FRAME CREATION
+
+        # list of frame IDs for later reference
+        self.frame_id = (self.wframe.winfo_id(), self.tframe.winfo_id(), self.auframe.winfo_id(), self.gframe.winfo_id(), self.mfframe.winfo_id())
+
+        # Frame gridding based on day of the week
+        if self.dayofweek != 'Sunday' and self.dayofweek != 'Saturday':
+            self.gframe.columnconfigure(0, weight=1)
+            self.gframe.grid(row=10, column=1, sticky="e")
+            self.tapes_widget(0, self.gframe)
+
+        if self.dayofweek == 'Monday':
+            self.mfframe.columnconfigure(0, weight=1)
+            self.mfframe.grid(row=20, column=1, sticky="e")
+
+        self.menubar()
+        self.tapes_widget(self.column_placeholder, self.wframe)
+        self.tapes_widget(self.column_placeholder, self.tframe)
+        self.tapes_widget(self.column_placeholder, self.auframe)
 
         self.username = os.getlogin()
 
-        self.wreturn = self.datenow.day + 10
-        self.treturn = self.datenow.day + 9
-        self.aureturn = self.datenow.day + 13
-        self.mfreturn = self.datenow.day + 14
+        # return dates for IronMountain
+        self.w_return = datetime.date.today() + datetime.timedelta(10)
+        self.t_return = datetime.date.today() + datetime.timedelta(9)
+        self.au_return = datetime.date.today() + datetime.timedelta(13)
+        self.mf_return = datetime.date.today() + datetime.timedelta(14)
 
+        # formats return date for preference
+        self.w_return_format = "%d/%d/%d" % (self.w_return.month, self.w_return.day, self.w_return.year)
+        self.t_return_format = "%d/%d/%d" % (self.t_return.month, self.t_return.day, self.t_return.year)
+        self.au_return_format = "%d/%d/%d" % (self.au_return.month, self.au_return.day, self.au_return.year)
+        self.mf_return_format = "%d/%d/%d" % (self.mf_return.month, self.mf_return.day, self.mf_return.year)
+
+        # places dates in ini file for formatting
         self.config.set('DEFAULT', 'datemonth', '%s' % self.datemonth)
         self.config.set('DEFAULT', 'dateyear', '%s' % self.dateyear)
-        self.config.set('DEFAULT', 'wreturn', '%s' % self.wreturn)
-        self.config.set('DEFAULT', 'treturn', '%s' % self.treturn)
-        self.config.set('DEFAULT', 'aureturn', '%s' % self.aureturn)
-        self.config.set('DEFAULT', 'mfreturn', '%s' % self.mfreturn)
+        self.config.set('DEFAULT', 'wreturn', '%s' % self.w_return_format)
+        self.config.set('DEFAULT', 'treturn', '%s' % self.t_return_format)
+        self.config.set('DEFAULT', 'aureturn', '%s' % self.au_return_format)
+        self.config.set('DEFAULT', 'mfreturn', '%s' % self.mf_return_format)
         self.config.set('DEFAULT', 'username', '%s' % self.username)
         with open('param.ini', 'w') as configfile:
             self.config.write(configfile)
 
-        # self.wdoc = 'PFS, RCP WINDOWS(WLxxxx)'
-        # self.tdoc = 'PFS, RCP UNIX(Txxxxx)'
-        # self.rdoc = 'CSI/RPG Unix(Rxxxxx)'
-        # self.mfdoc = 'PFS/Molded Fiber AS/400(MFPDxx and MFDDxx)'
-        # self.audoc = 'Automotive UNIX(AUxxxx)'
-        # self.csdoc = 'CSI AS/400(CSxxxx)'
-        # self.hdoc = 'Automotive AS/400(HBxxxx)'
-        #
-        # self.w_line = 'SENT DAILY %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.wdoc, self.datemonth, self.wreturn, self.dateyear, self.username)
-        # self.t_line = 'SENT DAILY %s, %s AND %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.tdoc, self.rdoc, self.mfdoc, self.datemonth, self.treturn, self.dateyear, self.username)
-        # self.mf_line = 'SENT WEEKLY %s TAPES RETURN ON %s/%s/%s & Locked by: %s' % (self.mfdoc, self.datemonth, self.mfreturn, self.dateyear, self.username)
-        # self.au_line = 'SENT DAILY %s, %s AND %s TAPES RETURN ON %s/%s/%s Locked by: %s' % (self.audoc, self.csdoc, self.hdoc, self.datemonth, self.aureturn, self.dateyear, self.username)
-        # self.g_line = 'SENT DAILY GRAHAM PACKAGING TAPES Locked by: %s' % self.username
-
+        # Runs a cleanup function on window close
         root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+        # Keeps the window from being resized by the user
         root.resizable(False, False)
 
-    def widgets(self):
+    def menubar(self):
 
         addmenu = tk.Menu(menu, tearoff=0)
         remmenu = tk.Menu(menu, tearoff=0)
@@ -89,334 +121,146 @@ class MainWindow(tk.Frame):
 
     def add_tape(self, code):
 
-        config = cp.ConfigParser()
-        config.read('param.ini')
-        self.curr_wplace = config.getint('DEFAULT', 'wcasecount')
-        self.curr_tplace = config.getint('DEFAULT', 'tcasecount')
-        self.curr_auplace = config.getint('DEFAULT', 'aucasecount')
-
         if code == 'W Tape':
-            self.wcase = ttk.Entry(self.wframe)
-            self.wcase.insert(0, "Scan Case")
-            self.wcase.grid(row=0, column=self.curr_wplace, sticky='w', padx=10)
-            self.wcase.bind('<Button-1>', self.clear_entry)
-
-            # text boxes for windows tape scans
-            self.wtext = tk.Text(self.wframe, height=8, width=10)
-            self.wtext.grid(row=1, column=self.curr_wplace, columnspan=2, sticky="wens", padx=10, pady=10)
-
-            self.curr_wplace += 1
-            self.wbutt = tk.Button(self.wframe, height=25, width=25)
-            self.wbutt.grid(row=0, column=self.curr_wplace, sticky="w", padx=10)
-            self.photo_butt = self.image_use[0]
-            self.wbutt.config(image=self.photo_butt)
-            self.wbutt.bind('<Button-1>', self.copy_buttons)
-            self.curr_wplace -= 1
-
-            self.wctuple = (self.wcase, self.wtext, self.wbutt, self.wbutt.winfo_id())
-            self.wc.append(self.wctuple)
-
-            self.curr_wplace += 2
-            config.set('DEFAULT', 'wcasecount', '%s' % self.curr_wplace)
-            with open('param.ini', 'w') as configfile:
-                config.write(configfile)
+            self.tapes_widget(self.column_placeholder, self.wframe)
 
         if code == 'T Tape':
-            self.tcase = ttk.Entry(self.tframe)
-            self.tcase.insert(0, "Scan Case")
-            self.tcase.grid(row=0, column=self.curr_tplace, sticky='w', padx=10)
-            self.tcase.bind('<Button-1>', self.clear_entry)
-
-            # # text boxes for windows tape scans
-            self.ttext = tk.Text(self.tframe, height=8, width=10)
-            self.ttext.grid(row=1, column=self.curr_tplace, columnspan=2, sticky="wens", padx=10, pady=10)
-
-            self.curr_tplace += 1
-            self.tbutt = tk.Button(self.tframe, height=25, width=25)
-            self.tbutt.grid(row=0, column=self.curr_tplace, sticky="w", padx=10)
-            self.photo_butt = self.image_use[0]
-            self.tbutt.config(image=self.photo_butt)
-            self.tbutt.bind('<Button-1>', self.copy_buttons)
-            self.curr_tplace -= 1
-
-            self.tctuple = (self.tcase, self.ttext, self.tbutt.winfo_id())
-            self.tc.append(self.tctuple)
-
-            self.curr_tplace += 2
-            config.set('DEFAULT', 'tcasecount', '%s' % (self.curr_tplace))
-            with open('param.ini', 'w') as configfile:
-                config.write(configfile)
+            self.tapes_widget(self.column_placeholder, self.tframe)
 
         if code == 'AU Tape':
-            self.aucase = ttk.Entry(self.auframe)
-            self.aucase.insert(0, "Scan Case")
-            self.aucase.grid(row=0, column=self.curr_auplace, padx=10)
-            self.aucase.bind('<Button-1>', self.clear_entry)
-
-            # # text boxes for windows tape scans
-            self.autext = tk.Text(self.auframe, height=8, width=10)
-            self.autext.grid(row=1, column=self.curr_auplace, columnspan=2, sticky="wens", padx=10, pady=10)
-
-            self.curr_auplace += 1
-            self.aubutt = tk.Button(self.auframe, height=25, width=25)
-            self.aubutt.grid(row=0, column=self.curr_auplace, sticky="w", padx=10)
-            self.photo_butt = self.image_use[0]
-            self.aubutt.config(image=self.photo_butt)
-            self.aubutt.bind('<Button-1>', self.copy_buttons)
-            self.curr_auplace -= 1
-
-            self.auctuple = (self.aucase, self.autext, self.aubutt.winfo_id())
-            self.auc.append(self.auctuple)
-
-            self.curr_auplace += 2
-            config.set('DEFAULT', 'aucasecount', '%s' % (self.curr_auplace))
-            with open('param.ini', 'w') as configfile:
-                config.write(configfile)
+            self.tapes_widget(self.column_placeholder, self.auframe)
 
     def rem_tape(self, code):
 
         if code == 'W Tape':
-            self.windex = len(self.wc) - 1
-            self.wc[self.windex][0].destroy()
-            self.wc[self.windex][1].destroy()
-            self.wc[self.windex][2].destroy()
-            del self.wc[self.windex]
+            for i, item in reversed(list(enumerate(self.tape_info))):
+                if self.frame_id[0] in item:
+                    for x in range(3):
+                        item[x].destroy()
+                    del self.tape_info[i]
+                    break
 
         elif code == 'T Tape':
-            self.tclen = len(self.tc)
-            self.tindex = self.tclen - 1
-            self.tc[self.tindex][0].destroy()
-            self.tc[self.tindex][1].destroy()
-            self.tc[self.tindex][2].destroy()
-            del self.tc[self.tindex]
+            for i, item in reversed(list(enumerate(self.tape_info))):
+                if self.frame_id[1] in item:
+                    for x in range(3):
+                        item[x].destroy()
+                    del self.tape_info[i]
+                    break
 
         elif code == 'AU Tape':
-            self.auclen = len(self.auc)
-            self.auindex = self.auclen - 1
-            self.auc[self.auindex][0].destroy()
-            self.auc[self.auindex][1].destroy()
-            self.auc[self.auindex][2].destroy()
-            del self.auc[self.auindex]
+            for i, item in reversed(list(enumerate(self.tape_info))):
+                if self.frame_id[2] in item:
+                    for x in range(3):
+                        item[x].destroy()
+                    del self.tape_info[i]
+                    break
 
-    def w_widgets(self):
-
-        # frame for windows tape scans. It's own frame is required for organization and multiples.
-        self.wframe = ttk.LabelFrame(labelanchor='n', text="Windows Tapes", height=600, width=200)
-        self.wframe.columnconfigure(0, weight=1)
-        self.wframe.grid(row=10, column=0, sticky="w")
+    def tapes_widget(self, x, frame):
 
         # entry box for W tape case ID
-        self.wcase = ttk.Entry(self.wframe)
-        self.wcase.insert(0, "Scan Case")
-        self.wcase.grid(row=0, column=0, sticky="w", padx=10)
-        self.wcase.bind('<Button-1>', self.clear_entry)
+        self.tape_case = ttk.Entry(frame)
+        self.tape_case.insert(0, "Scan Case")
+        self.tape_case.grid(row=0, column=x, sticky="w", padx=10)
+        self.tape_case.bind('<Button-1>', self.clear_entry)
 
         # text boxes for windows tape scans
-        self.wtext = tk.Text(self.wframe, height=8, width=10)
-        self.wtext.grid(row=1, columnspan=2, sticky="wens", padx=10, pady=10)
+        self.tape_text = tk.Text(frame, height=8, width=10)
+        self.tape_text.grid(row=1, column=x, columnspan=2, sticky="wens", padx=10, pady=10)
 
-        """ This button will be to copy everything in the Text box to be pasted externally"""
-        self.wbutt = tk.Button(self.wframe, height=25, width=25)
-        self.wbutt.grid(row=0, column=1, sticky="w", padx=10)
-        self.wcopyicon = tk.PhotoImage(file='copy.png')
-        self.wbutt.config(image=self.wcopyicon)
-        self.wbutt.bind('<Button-1>', self.copy_buttons)
+        # This button will be to copy everything in the Text box to be pasted externally
+        x += 1
+        self.copy_button = tk.Button(frame, height=25, width=25)
+        self.copy_button.grid(row=0, column=x, sticky="w", padx=10)
+        self.photo_button = self.image_use[0]
+        self.copy_button.config(image=self.photo_button)
+        self.copy_button.bind('<Button-1>', self.copy_buttons)
 
-        self.wctuple = (self.wcase, self.wtext, self.wbutt.winfo_id())
-        self.wc.append(self.wctuple)
-
-    def t_widgets(self):
-
-        # frame for T tapes. It's own frame is required for organization and multiples.
-        self.tframe = ttk.LabelFrame(labelanchor='n', text="T Tapes", height=600, width=200)
-        self.tframe.columnconfigure(0, weight=1)
-        self.tframe.grid(row=20, column=0, sticky="w")
-
-        # entry box for T tape case ID
-        self.tcase = ttk.Entry(self.tframe)
-        self.tcase.insert(0, "Scan Case")
-        self.tcase.grid(row=0, column=0, sticky="w", padx=10)
-        self.tcase.bind('<Button-1>', self.clear_entry)
-
-        # text box for t tape scans
-        self.ttext = tk.Text(self.tframe, height=8, width=10)
-        self.ttext.grid(row=1, columnspan=2, sticky="wens", padx=10, pady=10)
-
-        self.tbutt = tk.Button(self.tframe, height=25, width=25)
-        self.tbutt.grid(row=0, column=1, sticky="w", padx=10)
-        self.tcopyicon = tk.PhotoImage(file='copy.png')
-        self.tbutt.config(image=self.tcopyicon)
-        self.tbutt.bind('<Button-1>', self.copy_buttons)
-
-        self.tctuple = (self.tcase, self.ttext, self.tbutt.winfo_id())
-        self.tc.append(self.tctuple)
-
-    def au_widgets(self):
-        # frame for T tapes. It's own frame is required for organization and multiples.
-        self.auframe = ttk.LabelFrame(labelanchor='n', text="AU Tapes", height=600, width=200)
-        self.auframe.columnconfigure(0, weight=1)
-        self.auframe.grid(row=30, column=0, sticky="w")
-
-        # entry box for T tape case ID
-        self.aucase = ttk.Entry(self.auframe)
-        self.aucase.insert(0, "Scan Case")
-        self.aucase.grid(row=0, column=0, sticky="w", padx=10)
-        self.aucase.bind('<Button-1>', self.clear_entry)
-
-        # text box for t tape scans
-        self.autext = tk.Text(self.auframe, height=8, width=10)
-        self.autext.grid(row=1, columnspan=2, sticky="wens", padx=10, pady=10)
-
-        self.aubutt = tk.Button(self.auframe, height=25, width=25)
-        self.aubutt.grid(row=0, column=1, sticky="w", padx=10)
-        self.aucopyicon = tk.PhotoImage(file='copy.png')
-        self.aubutt.config(image=self.aucopyicon)
-        self.aubutt.bind('<Button-1>', self.copy_buttons)
-
-        self.auctuple = (self.aucase, self.autext, self.aubutt.winfo_id())
-        self.auc.append(self.auctuple)
-
-    def g_widget(self):
-        if self.dayofweek != 'Sunday' and self.dayofweek != 'Saturday':
-            self.gframe = ttk.LabelFrame(labelanchor='n', text="G Tapes", height=600, width=200)
-            self.gframe.columnconfigure(0, weight=1)
-            self.gframe.grid(row=10, column=1, sticky="e")
-
-            # entry box for G tape case ID
-            self.gcase = ttk.Entry(self.gframe)
-            self.gcase.insert(0, "Scan Case")
-            self.gcase.grid(row=0, column=0, sticky="w", padx=10)
-            self.gcase.bind('<Button-1>', self.clear_entry)
-
-            # text box for G tape scans
-            self.gtext = tk.Text(self.gframe, height=8, width=10)
-            self.gtext.grid(row=1, columnspan=2, sticky="wens", padx=10, pady=10)
-
-            self.gbutt = tk.Button(self.gframe, height=25, width=25)
-            self.gbutt.grid(row=0, column=1, sticky="w", padx=10)
-            self.gcopyicon = tk.PhotoImage(file='copy.png')
-            self.gbutt.config(image=self.gcopyicon)
-            self.gbutt.bind('<Button-1>', self.copy_buttons)
-
-            self.gctuple = (self.gcase, self.gtext, self.gbutt.winfo_id())
-            self.gc.append(self.gctuple)
-
-    def mf_widget(self):
-        if self.dayofweek == 'Monday':
-            self.mfframe = ttk.LabelFrame(labelanchor='n', text="MF Tapes", height=600, width=200)
-            self.mfframe.columnconfigure(0, weight=1)
-            self.mfframe.grid(row=20, column=1, sticky="e")
-
-            # entry box for G tape case ID
-            self.mfcase = ttk.Entry(self.mfframe)
-            self.mfcase.insert(0, "Scan Case")
-            self.mfcase.grid(row=0, column=0, sticky="w", padx=10)
-            self.mfcase.bind('<Button-1>', self.clear_entry)
-
-            # text box for G tape scans
-            self.mftext = tk.Text(self.mfframe, height=8, width=10)
-            self.mftext.grid(row=1, columnspan=2, sticky="wens", padx=10, pady=10)
-
-            self.mfbutt = tk.Button(self.mfframe, height=25, width=25)
-            self.mfbutt.grid(row=0, column=1, sticky="w", padx=10)
-            self.mfcopyicon = tk.PhotoImage(file='copy.png')
-            self.mfbutt.config(image=self.mfcopyicon)
-            self.mfbutt.bind('<Button-1>', self.copy_buttons)
-
-            self.mftuple = (self.mfcase, self.mftext, self.mfbutt.winfo_id())
-            self.mf.append(self.mftuple)
+        self.tape_info.append((self.tape_case, self.tape_text, self.copy_button, self.copy_button.winfo_id(), frame.winfo_id()))
+        self.column_placeholder += 2
 
     def dates(self):
-        self.datenow = datetime.today()
+        self.datenow = datetime.date.today()
         self.datemonth = self.datenow.month
         self.dateday = self.datenow.day
         self.dateyear = self.datenow.year
-        self.dayofweek = date.today().strftime("%A")
+        self.dayofweek = datetime.date.today().strftime("%A")
+
+    def checker(self):
+        pass
+        print(int(self.tape_text.index('end-1c').split('.')[0]))
+
 
     def create_doc(self):
 
         """The below code creates a document, pulls the data from the entry and text widgets and formats it as needed"""
         outgoing = open(r'C:\Users\%s\Desktop\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday), 'w')
 
-        len_w = len(self.wc)
-        len_t = len(self.tc)
-        len_au = len(self.auc)
-        len_g = len(self.gc)
-        len_mf = len(self.mfc)
+        # Lists to organize the output
+        w_group = [item for item in self.tape_info if self.frame_id[0] in item]
+        t_group = [item for item in self.tape_info if self.frame_id[1] in item]
+        au_group = [item for item in self.tape_info if self.frame_id[2] in item]
+        g_group = [item for item in self.tape_info if self.frame_id[3] in item]
+        mf_group = [item for item in self.tape_info if self.frame_id[4] in item]
 
-        for x in range(0, len_w):
-            in_wcase = self.wc[x][0].get()
-            in_wtext = self.wc[x][1].get(1.0, 'end')
-            outgoing.write(in_wcase + '\n' + self.config.get('SETTINGS', 'w_line') + '\n' + in_wtext + '\n')
+        reorg_list = w_group + t_group + au_group
+        while len(reorg_list) < len(self.tape_info):
+            if g_group:
+                reorg_list = reorg_list + g_group
+            if mf_group:
+                reorg_list = reorg_list + mf_group
 
-        for x in range(0, len_t):
-            in_tcase = self.tc[x][0].get()
-            in_ttext = self.tc[x][1].get(1.0, 'end')
-            if self.dayofweek == 'Monday':
-                outgoing.write(in_tcase + '\n' + self.config.get('SETTINGS', 't_line2') + '\n' + in_ttext + '\n')
-            else:
-                outgoing.write(in_tcase + '\n' + self.config.get('SETTINGS', 't_line1') + '\n' + in_ttext + '\n')
-
-        for x in range(0, len_au):
-            in_aucase = self.auc[x][0].get()
-            in_autext = self.auc[x][1].get(1.0, 'end')
-            outgoing.write(in_aucase + '\n' + self.config.get('SETTINGS', 'au_line') + '\n' + in_autext + '\n')
-
-        if self.dayofweek != 'Sunday' and self.dayofweek != 'Saturday':
-            for x in range(0, len_g):
-                in_gcase = self.gc[x][0].get()
-                in_gtext = self.gc[x][1].get(1.0, 'end')
-                outgoing.write(in_gcase + '\n' + self.config.get('SETTINGS', 'g_line') + '\n' + in_gtext + '\n')
-
-        if self.dayofweek == 'Monday':
-            for x in range(0, len_mf):
-                in_mfcase = self.mfc[x][0].get()
-                in_mftext = self.mfc[x][1].get(1.0, 'end')
-                outgoing.write(in_mfcase + '\n' + self.config.get('SETTINGS', 'mf_line') + '\n' + in_mftext + '\n')
+        # for x in range(0, len(reorg_list)):
+        for item in reorg_list:
+            if self.frame_id[0] == item[4]:
+                in_case = item[0].get()
+                in_text = item[1].get(1.0, 'end')
+                outgoing.write(in_case + '\n' + self.config.get('SETTINGS', 'w_line') + '\n' + in_text + '\n')
+            if self.frame_id[1] == item[4]:
+                in_case = item[0].get()
+                in_text = item[1].get(1.0, 'end')
+                if self.dayofweek == 'Monday':
+                    outgoing.write(
+                        in_case + '\n' + self.config.get('SETTINGS', 't_line_monday') + '\n' + in_text + '\n')
+                else:
+                    outgoing.write(
+                        in_case + '\n' + self.config.get('SETTINGS', 't_line_main') + '\n' + in_text + '\n')
+            if self.frame_id[2] == item[4]:
+                in_case = item[0].get()
+                in_text = item[1].get(1.0, 'end')
+                outgoing.write(in_case + '\n' + self.config.get('SETTINGS', 'au_line') + '\n' + in_text + '\n')
+            if self.frame_id[3] == item[4]:
+                in_case = item[0].get()
+                in_text = item[1].get(1.0, 'end')
+                outgoing.write(in_case + '\n' + self.config.get('SETTINGS', 'g_line') + '\n' + in_text + '\n')
+            if self.frame_id[4] == item[4]:
+                in_case = item[0].get()
+                in_text = item[1].get(1.0, 'end')
+                outgoing.write(in_case + '\n' + self.config.get('SETTINGS', 'mf_line') + '\n' + in_text + '\n')
 
         outgoing.close()
         os.startfile(r'C:\Users\%s\Desktop\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday))
 
     def copy_buttons(self, event=None):
         indx = event.widget.winfo_id()
-        widgetset = [item for item in self.wc if indx in item]
-        if widgetset:
-            root.clipboard_clear()
-            copy_w_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'w_line') + '\n' + copy_w_text)
+        root.clipboard_clear()
 
-        widgetset = [item for item in self.tc if indx in item]
-
-        if widgetset:
-            if self.dayofweek == 'Monday':
-                root.clipboard_clear()
-                copy_t_text = widgetset[0][1].get(1.0, 'end')
-                root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line2') + '\n' + copy_t_text)
-            else:
-                root.clipboard_clear()
-                copy_t_text = widgetset[0][1].get(1.0, 'end')
-                root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line1') + '\n' + copy_t_text)
-
-        widgetset = [item for item in self.auc if indx in item]
-
-        if widgetset:
-            root.clipboard_clear()
-            copy_au_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'au_line') + '\n' + copy_au_text)
-
-        widgetset = [item for item in self.gc if indx in item]
-
-        if widgetset:
-            root.clipboard_clear()
-            copy_g_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'g_line') + '\n' + copy_g_text)
-
-        widgetset = [item for item in self.mfc if indx in item]
-
-        if widgetset:
-            root.clipboard_clear()
-            copy_mf_text = widgetset[0][1].get(1.0, 'end')
-            root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'mf_line') + '\n' + copy_mf_text)
+        for item in self.tape_info:
+            if indx in item:
+                copy_text = item[1].get(1.0, 'end')
+                if self.frame_id[0] == item[4]:
+                    root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'w_line') + '\n' + copy_text)
+                elif self.frame_id[1] == item[4]:
+                    if self.dayofweek == 'Monday':
+                        root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line_monday') + '\n' + copy_text)
+                    else:
+                        root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line_main') + '\n' + copy_text)
+                elif self.frame_id[2] == item[4]:
+                    root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'au_line') + '\n' + copy_text)
+                elif self.frame_id[3] == item[4]:
+                    root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'g_line') + '\n' + copy_text)
+                elif self.frame_id[4] == item[4]:
+                    root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'mf_line') + '\n' + copy_text)
 
     # method to delete default text when mouse button is pressed
     def clear_entry(self, event=None):
@@ -426,22 +270,11 @@ class MainWindow(tk.Frame):
             event.widget.delete(0, 'end')
 
     def on_close(self):
-        config = cp.ConfigParser()
-        config.read('param.ini')
 
-        # resets necessary config on window close
-        config.set('DEFAULT', 'wcasecount', '2')
-        config.set('DEFAULT', 'tcasecount', '2')
-        config.set('DEFAULT', 'aucasecount', '2')
-        config.set('DEFAULT', 'imagecount', '0')
-
-        with open('param.ini', 'w') as configfile:
-            config.write(configfile)
         root.destroy()
 
 
 root = tk.Tk()
-
 
 root.style = ttk.Style()
 root.style.theme_use("default")
