@@ -57,6 +57,7 @@ class MainWindow(tk.Frame):
         if self.dayofweek == 'Monday':
             self.mfframe.columnconfigure(0, weight=1)
             self.mfframe.grid(row=20, column=1, sticky="e")
+            self.tapes_widget(0, self.mfframe)
 
         self.menubar()
         self.tapes_widget(self.column_placeholder, self.wframe)
@@ -180,11 +181,11 @@ class MainWindow(tk.Frame):
         self.column_placeholder += 2
 
     def dates(self):
-        self.datenow = datetime.date.today()
+        self.datenow = datetime.datetime.now()
         self.datemonth = self.datenow.month
         self.dateday = self.datenow.day
         self.dateyear = self.datenow.year
-        self.dayofweek = datetime.date.today().strftime("%A")
+        self.dayofweek = self.datenow.strftime("%A")
 
     def checker(self):
         pass
@@ -194,7 +195,7 @@ class MainWindow(tk.Frame):
     def create_doc(self):
 
         """The below code creates a document, pulls the data from the entry and text widgets and formats it as needed"""
-        outgoing = open(r'C:\Users\%s\Desktop\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday), 'w')
+        outgoing = open(r'C:\Users\%s\Documents\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday), 'w')  ## see line243 ******Fix formatting on single digit month*******
 
         # Lists to organize the output
         w_group = [item for item in self.tape_info if self.frame_id[0] in item]
@@ -239,7 +240,7 @@ class MainWindow(tk.Frame):
                 outgoing.write(in_case + '\n' + self.config.get('SETTINGS', 'mf_line') + '\n' + in_text + '\n')
 
         outgoing.close()
-        os.startfile(r'C:\Users\%s\Desktop\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday))
+        os.startfile(r'C:\Users\%s\Desktop\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday)) ## see line 198******Fix formatting on single digit month*******
 
     def copy_buttons(self, event=None):
         indx = event.widget.winfo_id()
@@ -249,18 +250,18 @@ class MainWindow(tk.Frame):
             if indx in item:
                 copy_text = item[1].get(1.0, 'end')
                 if self.frame_id[0] == item[4]:
-                    root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'w_line') + '\n' + copy_text)
+                    root.clipboard_append(str(datetime.date.today().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'w_line') + '\n' + copy_text)
                 elif self.frame_id[1] == item[4]:
                     if self.dayofweek == 'Monday':
-                        root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line_monday') + '\n' + copy_text)
+                        root.clipboard_append(str(datetime.date.today().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line_monday') + '\n' + copy_text)
                     else:
-                        root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line_main') + '\n' + copy_text)
+                        root.clipboard_append(str(datetime.date.today().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 't_line_main') + '\n' + copy_text)
                 elif self.frame_id[2] == item[4]:
-                    root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'au_line') + '\n' + copy_text)
+                    root.clipboard_append(str(datetime.date.today().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'au_line') + '\n' + copy_text)
                 elif self.frame_id[3] == item[4]:
-                    root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'g_line') + '\n' + copy_text)
+                    root.clipboard_append(str(datetime.date.today().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'g_line') + '\n' + copy_text)
                 elif self.frame_id[4] == item[4]:
-                    root.clipboard_append(str(datetime.now().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'mf_line') + '\n' + copy_text)
+                    root.clipboard_append(str(datetime.date.today().strftime("%m-%d-%y")) + ' ' + self.config.get('SETTINGS', 'mf_line') + '\n' + copy_text)
 
     # method to delete default text when mouse button is pressed
     def clear_entry(self, event=None):
