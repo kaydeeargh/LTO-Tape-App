@@ -195,7 +195,7 @@ class MainWindow(tk.Frame):
     def create_doc(self):
 
         """The below code creates a document, pulls the data from the entry and text widgets and formats it as needed"""
-        outgoing = open(r'C:\Users\%s\Documents\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday), 'w')  ## see line243 ******Fix formatting on single digit month*******
+        outgoing = open(r'C:\Users\%s\Documents\Outgoing_%s%s%s.txt' % (self.username, self.dateyear, self.datemonth, self.dateday), 'w+')  ## see line243 ******Fix formatting on single digit month*******
 
         # Lists to organize the output
         w_group = [item for item in self.tape_info if self.frame_id[0] in item]
